@@ -183,13 +183,13 @@ def query_yes_no(question, default='yes'):
 
 
 def banner():
-    print ("")
-    print ("DomLink Domain Discovery Tool")
-    print ("Author: Vincent Yiu (@vysecurity)")
-    print ("Contributors: Jan Rude (@whoot); John Bond (@b4ldr)")
-    print ("https://www.github.com/vysec/DomLink")
-    print(("Version: {}".format(__version__)))
-    print ("")
+    print("")
+    print("DomLink Domain Discovery Tool")
+    print("Author: Vincent Yiu (@vysecurity)")
+    print("Contributors: Jan Rude (@whoot); John Bond (@b4ldr)")
+    print("https://www.github.com/vysec/DomLink")
+    print("Version: {}".format(__version__))
+    print("")
 
 def main():
     banner()
@@ -281,4 +281,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
