@@ -4,13 +4,15 @@ from configparser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 import sys
+import re
 import os.path
 import urllib.request, urllib.parse, urllib.error
 import logging
 
 
-__version__ = '0.2'
-
+__version__ = '0.3'
+__mailPattern__ = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
+__privacyPatterns__ = ['REDACTED FOR PRIVACY', 'Whois Privacy Protection', 'Whois Privacy Service', 'Identity Protection Service']
 
 def set_log_level(args_level):
     if args_level is None:
@@ -88,11 +90,11 @@ def parse_whois(base_url, domain):
         record = '{}_contact'.format(record)
         email = content.get(record, {}).get('email_address', '').lower()
         company = content.get(record, {}).get('company_name', '')
-        if email and (email != 'redacted for privacy') and ('*' not in email):
+        if email and re.match(__mailPattern__, email):
             logging.debug('domain: adding email {}'.format(email))
             emails[email] = True
-        if company and company != 'REDACTED FOR PRIVACY':
-            logging.debug('domain: adding email {}'.format(email))
+        if company and company not in __privacyPatterns__:
+            logging.debug('domain: adding company {}'.format(email))
             companies[company] = True
     return {'emails': emails, 'companies': companies, 'domains': domains}
 
@@ -110,10 +112,10 @@ def parse_history(base_url, domain):
                 entry = '{}_contact'.format(entry)
                 email = record.get(entry, {}).get('email_address', '').lower()
                 company = record.get(entry, {}).get('company_name', '')
-                if email and (email != 'redacted for privacy') and ('*' not in email):
+                if email and re.match(__mailPattern__, email):
                     logging.debug('domain: adding email {}'.format(email))
                     emails[email] = True
-                if company and company != 'REDACTED FOR PRIVACY':
+                if company and company not in __privacyPatterns__:
                     logging.debug('domain: adding email {}'.format(email))
                     companies[company] = True
     return {'emails': emails, 'companies': companies, 'domains': domains}
@@ -139,7 +141,7 @@ def recursive_search(base_url, search, find, page=1, pages=9999):
                 if company:
                     logging.debug('{}={} adding email {}'.format(search, find, company))
                     companies[company] = True
-                if email and (email != 'redacted for privacy') and ('*' not in email):
+                if email and re.match(__mailPattern__, email):
                     logging.debug('{}={} adding email {}'.format(search, find, email))
                     emails[email] = True
         page += 1
@@ -186,7 +188,7 @@ def banner():
     print ("Author: Vincent Yiu (@vysecurity)")
     print ("Contributors: Jan Rude (@whoot); John Bond (@b4ldr)")
     print ("https://www.github.com/vysec/DomLink")
-    print ("Version: {}".format(__version__))
+    print(("Version: {}".format(__version__)))
     print ("")
 
 def main():
